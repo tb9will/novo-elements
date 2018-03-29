@@ -1,7 +1,17 @@
 import {
-    ChangeDetectionStrategy, ChangeDetectorRef, Component, Input, Optional,
-    ViewEncapsulation, OnDestroy, OnInit, HostBinding, HostListener, Directive,
-    AfterViewInit, ElementRef
+  ChangeDetectionStrategy,
+  ChangeDetectorRef,
+  Component,
+  Input,
+  Optional,
+  ViewEncapsulation,
+  OnDestroy,
+  OnInit,
+  HostBinding,
+  HostListener,
+  Directive,
+  AfterViewInit,
+  ElementRef,
 } from '@angular/core';
 import { coerceBooleanProperty } from '@angular/cdk/coercion';
 import { CdkColumnDef } from '@angular/cdk/table';
@@ -15,23 +25,23 @@ import { SimpleTableColumnFilterConfig, SimpleTableColumnFilterOption } from './
 import { NovoActivityTableState } from './state';
 
 @Directive({
-    selector: '[novoSimpleFilterFocus]'
+  selector: '[novoSimpleFilterFocus]',
 })
 export class NovoSimpleFilterFocus implements AfterViewInit {
-    constructor(private element: ElementRef) { }
+  constructor(private element: ElementRef) {}
 
-    ngAfterViewInit() {
-        this.element.nativeElement.focus();
-    }
+  ngAfterViewInit() {
+    this.element.nativeElement.focus();
+  }
 }
 
 @Component({
-    selector: '[novo-simple-cell-config]',
-    template: `
+  selector: '[novo-simple-cell-config]',
+  template: `
         <label (click)="sort()" data-automation-id="novo-activity-table-label" [class.sort-disabled]="!config.sortable"><ng-content></ng-content></label>
         <div>
             <button *ngIf="config.sortable" theme="icon" [icon]="icon" (click)="sort()" [class.active]="sortActive" data-automation-id="novo-activity-table-sort"></button>
-            <novo-dropdown *ngIf="config.filterable" side="right" appendToBody="true" parentScrollSelector=".novo-simple-table" containerClass="simple-table-dropdown" data-automation-id="novo-activity-table-filter">
+            <novo-dropdown *ngIf="config.filterable" side="right" parentScrollSelector=".novo-simple-table" containerClass="simple-table-dropdown" data-automation-id="novo-activity-table-filter">
                 <button type="button" theme="icon" icon="filter" [class.active]="filterActive"></button>
                 <div class="header">
                     <span>{{ labels.filters }}</span>
@@ -66,164 +76,174 @@ export class NovoSimpleFilterFocus implements AfterViewInit {
             </novo-dropdown>
         </div>
     `,
-    encapsulation: ViewEncapsulation.None,
-    changeDetection: ChangeDetectionStrategy.OnPush
+  encapsulation: ViewEncapsulation.None,
+  changeDetection: ChangeDetectionStrategy.OnPush,
 })
 export class NovoSimpleCellHeader implements NovoSimpleSortFilter, OnInit, OnDestroy {
+  @Input() defaultSort: { id: string; value: string };
 
-    @Input() defaultSort: { id: string, value: string };
+  @Input('novo-simple-cell-config')
+  get config() {
+    return this._config;
+  }
+  set config(v) {
+    if (!v) {
+      this._config = {
+        sortable: false,
+        filterable: false,
+        filterConfig: {
+          type: 'text',
+        },
+      };
+    } else {
+      this._config = {
+        sortable: coerceBooleanProperty(v.sortable),
+        filterable: coerceBooleanProperty(v.filterable),
+        transforms: v.transforms || {},
+        filterConfig: v.filterConfig || {
+          type: 'text',
+        },
+      };
 
-    @Input('novo-simple-cell-config')
-    get config() { return this._config; }
-    set config(v) {
-        if (!v) {
-            this._config = {
-                sortable: false,
-                filterable: false,
-                filterConfig: {
-                    type: 'text'
-                }
-            }
-        } else {
-            this._config = {
-                sortable: coerceBooleanProperty(v.sortable),
-                filterable: coerceBooleanProperty(v.filterable),
-                transforms: v.transforms || {},
-                filterConfig: v.filterConfig || {
-                    type: 'text'
-                }
-            }
-
-            if (this._config.filterConfig.type === 'date' && !this._config.filterConfig.options) {
-                this._config.filterConfig.options = this.getDefaultDateFilterOptions();
-            }
-        }
+      if (this._config.filterConfig.type === 'date' && !this._config.filterConfig.options) {
+        this._config.filterConfig.options = this.getDefaultDateFilterOptions();
+      }
     }
-    private _config: { sortable: boolean, filterable: boolean, transforms?: { filter?: Function, sort?: Function }, filterConfig: SimpleTableColumnFilterConfig };
+  }
+  private _config: {
+    sortable: boolean;
+    filterable: boolean;
+    transforms?: { filter?: Function; sort?: Function };
+    filterConfig: SimpleTableColumnFilterConfig;
+  };
 
-    private _rerenderSubscription: Subscription;
-    private changeTimeout: any;
+  private _rerenderSubscription: Subscription;
+  private changeTimeout: any;
 
-    public icon: string = 'sortable';
-    public id: string;
-    public filter: string | boolean;
-    public direction: string;
-    public filterActive: boolean = false;
-    public sortActive: boolean = false;
-    public showCustomRange: boolean = false;
-    public activeDateFilter: string;
+  public icon: string = 'sortable';
+  public id: string;
+  public filter: string | boolean;
+  public direction: string;
+  public filterActive: boolean = false;
+  public sortActive: boolean = false;
+  public showCustomRange: boolean = false;
+  public activeDateFilter: string;
 
-    constructor(
-        private changeDetectorRef: ChangeDetectorRef,
-        public labels: NovoLabelService,
-        private state: NovoActivityTableState,
-        @Optional() public _sort: NovoSortFilter,
-        @Optional() public _cdkColumnDef: CdkColumnDef
-    ) {
-        this._rerenderSubscription = state.updates.subscribe((change: NovoSimpleTableChange) => {
-            if (change.sort && change.sort.id === this.id) {
-                this.icon = `sort-${change.sort.value}`;
-                this.sortActive = true;
-            } else {
-                this.icon = 'sortable';
-                this.sortActive = false;
-            }
-            if (change.filter && change.filter.id === this.id) {
-                this.filterActive = true;
-                this.filter = change.filter.value;
-            } else {
-                this.filterActive = false;
-                this.filter = undefined;
-            }
-            changeDetectorRef.markForCheck();
-        });
-    }
-
-    public ngOnInit(): void {
-        if (this._cdkColumnDef) {
-            this.id = this._cdkColumnDef.name;
-        }
-        if (this.defaultSort && this.id === this.defaultSort.id) {
-            this.icon = `sort-${this.defaultSort.value}`;
-            this.sortActive = true;
-            this.changeDetectorRef.markForCheck();
-        }
-    }
-
-    public ngOnDestroy(): void {
-        this._rerenderSubscription.unsubscribe();
-    }
-
-    public sort(): void {
-        if (this.changeTimeout) {
-            clearTimeout(this.changeTimeout);
-        }
-        this.changeTimeout = setTimeout(() => {
-            this.direction = this.getNextSortDirection(this.direction);
-            this._sort.sort(this.id, this.direction, this._config.transforms.sort);
-            this.changeDetectorRef.markForCheck();
-        }, 300);
-    }
-
-    public filterData(filter?: any): void {
-        if (this.config.filterConfig.type === 'date' && filter) {
-            this.activeDateFilter = filter.label || this.labels.customDateRange;
-            if (filter.startDate && filter.endDate) {
-                filter = {
-                    min: dateFns.startOfDay(filter.startDate),
-                    max: dateFns.endOfDay(filter.endDate),
-                };
-            } else {
-                filter = {
-                    min: dateFns.startOfDay(dateFns.addDays(dateFns.startOfToday(), filter.min)),
-                    max: dateFns.endOfDay(dateFns.addDays(dateFns.startOfToday(), filter.max)),
-                };
-            }
-        }
-        if (filter) {
-            if (filter.hasOwnProperty('value')) {
-                this.filter = filter.value;
-            } else {
-                this.filter = filter;
-            }
-        }
-        if (this.changeTimeout) {
-            clearTimeout(this.changeTimeout);
-        }
-        this.changeTimeout = setTimeout(() => {
-            if (this.filter === '') {
-                this.filter = undefined;
-            }
-            this._sort.filter(this.id, this.filter, this._config.transforms.filter);
-            this.changeDetectorRef.markForCheck();
-        }, 300);
-    }
-
-    public clearFilter(): void {
+  constructor(
+    private changeDetectorRef: ChangeDetectorRef,
+    public labels: NovoLabelService,
+    private state: NovoActivityTableState,
+    @Optional() public _sort: NovoSortFilter,
+    @Optional() public _cdkColumnDef: CdkColumnDef,
+  ) {
+    this._rerenderSubscription = state.updates.subscribe((change: NovoSimpleTableChange) => {
+      if (change.sort && change.sort.id === this.id) {
+        this.icon = `sort-${change.sort.value}`;
+        this.sortActive = true;
+      } else {
+        this.icon = 'sortable';
+        this.sortActive = false;
+      }
+      if (change.filter && change.filter.id === this.id) {
+        this.filterActive = true;
+        this.filter = change.filter.value;
+      } else {
+        this.filterActive = false;
         this.filter = undefined;
-        this.activeDateFilter = undefined;
-        this.filterData();
-    }
+      }
+      changeDetectorRef.markForCheck();
+    });
+  }
 
-    private getNextSortDirection(direction: string): string {
-        if (!direction) { return 'asc'; }
-        if (direction === 'asc') { return 'desc'; }
-        return 'asc';
+  public ngOnInit(): void {
+    if (this._cdkColumnDef) {
+      this.id = this._cdkColumnDef.name;
     }
+    if (this.defaultSort && this.id === this.defaultSort.id) {
+      this.icon = `sort-${this.defaultSort.value}`;
+      this.sortActive = true;
+      this.changeDetectorRef.markForCheck();
+    }
+  }
 
-    private getDefaultDateFilterOptions(): SimpleTableColumnFilterOption[] {
-        let opts: SimpleTableColumnFilterOption[] = [
-            { label: this.labels.past1Day, min: -1, max: 0 },
-            { label: this.labels.past7Days, min: -7, max: 0 },
-            { label: this.labels.past30Days, min: -30, max: 0 },
-            { label: this.labels.past90Days, min: -90, max: 0 },
-            { label: this.labels.past1Year, min: -366, max: 0 },
-            { label: this.labels.next1Day, min: 0, max: 1 },
-            { label: this.labels.next7Days, min: 0, max: 7 },
-            { label: this.labels.next30Days, min: 0, max: 30 },
-            { label: this.labels.next90Days, min: 0, max: 90 },
-            { label: this.labels.next1Year, min: 0, max: 366 }
-        ];
-        return opts;
+  public ngOnDestroy(): void {
+    this._rerenderSubscription.unsubscribe();
+  }
+
+  public sort(): void {
+    if (this.changeTimeout) {
+      clearTimeout(this.changeTimeout);
     }
+    this.changeTimeout = setTimeout(() => {
+      this.direction = this.getNextSortDirection(this.direction);
+      this._sort.sort(this.id, this.direction, this._config.transforms.sort);
+      this.changeDetectorRef.markForCheck();
+    }, 300);
+  }
+
+  public filterData(filter?: any): void {
+    if (this.config.filterConfig.type === 'date' && filter) {
+      this.activeDateFilter = filter.label || this.labels.customDateRange;
+      if (filter.startDate && filter.endDate) {
+        filter = {
+          min: dateFns.startOfDay(filter.startDate),
+          max: dateFns.endOfDay(filter.endDate),
+        };
+      } else {
+        filter = {
+          min: dateFns.startOfDay(dateFns.addDays(dateFns.startOfToday(), filter.min)),
+          max: dateFns.endOfDay(dateFns.addDays(dateFns.startOfToday(), filter.max)),
+        };
+      }
+    }
+    if (filter) {
+      if (filter.hasOwnProperty('value')) {
+        this.filter = filter.value;
+      } else {
+        this.filter = filter;
+      }
+    }
+    if (this.changeTimeout) {
+      clearTimeout(this.changeTimeout);
+    }
+    this.changeTimeout = setTimeout(() => {
+      if (this.filter === '') {
+        this.filter = undefined;
+      }
+      this._sort.filter(this.id, this.filter, this._config.transforms.filter);
+      this.changeDetectorRef.markForCheck();
+    }, 300);
+  }
+
+  public clearFilter(): void {
+    this.filter = undefined;
+    this.activeDateFilter = undefined;
+    this.filterData();
+  }
+
+  private getNextSortDirection(direction: string): string {
+    if (!direction) {
+      return 'asc';
+    }
+    if (direction === 'asc') {
+      return 'desc';
+    }
+    return 'asc';
+  }
+
+  private getDefaultDateFilterOptions(): SimpleTableColumnFilterOption[] {
+    let opts: SimpleTableColumnFilterOption[] = [
+      { label: this.labels.past1Day, min: -1, max: 0 },
+      { label: this.labels.past7Days, min: -7, max: 0 },
+      { label: this.labels.past30Days, min: -30, max: 0 },
+      { label: this.labels.past90Days, min: -90, max: 0 },
+      { label: this.labels.past1Year, min: -366, max: 0 },
+      { label: this.labels.next1Day, min: 0, max: 1 },
+      { label: this.labels.next7Days, min: 0, max: 7 },
+      { label: this.labels.next30Days, min: 0, max: 30 },
+      { label: this.labels.next90Days, min: 0, max: 90 },
+      { label: this.labels.next1Year, min: 0, max: 366 },
+    ];
+    return opts;
+  }
 }

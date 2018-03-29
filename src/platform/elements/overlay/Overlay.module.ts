@@ -4,13 +4,11 @@ import { FormsModule } from '@angular/forms';
 import { CommonModule } from '@angular/common';
 import { OverlayModule } from '@angular/cdk/overlay';
 // APP
-import { NovoOverlayTemplate, DEFAULT_OVERLAY_SCROLL_STRATEGY_PROVIDER } from './Overlay';
+import { NovoOverlayTemplate } from './Overlay';
 
 @NgModule({
-    imports: [CommonModule, FormsModule, OverlayModule],
-    declarations: [NovoOverlayTemplate],
-    exports: [NovoOverlayTemplate],
-    providers: [DEFAULT_OVERLAY_SCROLL_STRATEGY_PROVIDER]
+  imports: [CommonModule, FormsModule, OverlayModule],
+  declarations: [NovoOverlayTemplate],
+  exports: [NovoOverlayTemplate],
 })
-export class NovoOverlayModule {
-}
+export class NovoOverlayModule {}

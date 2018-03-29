@@ -317,7 +317,9 @@ export class NovoTableElement implements DoCheck {
             row.rowId = this._rows.length;
             this.columns.forEach((column) => {
               // Use the control passed or use a ReadOnlyControl so that the form has the values
-              let control = column.editorConfig ? ControlFactory.create(column.editorType, column.editorConfig) : new ReadOnlyControl({ key: column.name });
+              let control = column.editorConfig
+                ? ControlFactory.create(column.editorType, column.editorConfig)
+                : new ReadOnlyControl({ key: column.name });
               row.controls[column.name] = control;
               rowControls.push(control);
             });
@@ -859,7 +861,12 @@ export class NovoTableElement implements DoCheck {
           row._editing[column.name] = true;
         } else if (!Helpers.isEmpty(rowNumber) && rowIndex === Number(rowNumber) && Helpers.isEmpty(columnNumber)) {
           row._editing[column.name] = true;
-        } else if (!Helpers.isEmpty(rowNumber) && !Helpers.isEmpty(columnNumber) && rowIndex === Number(rowNumber) && columnIndex === Number(columnNumber)) {
+        } else if (
+          !Helpers.isEmpty(rowNumber) &&
+          !Helpers.isEmpty(columnNumber) &&
+          rowIndex === Number(rowNumber) &&
+          columnIndex === Number(columnNumber)
+        ) {
           row._editing[column.name] = true;
         } else {
           row._editing[column.name] = false;
@@ -905,7 +912,9 @@ export class NovoTableElement implements DoCheck {
     row.rowId = this._rows.length + 1;
     this.columns.forEach((column) => {
       // Use the control passed or use a ReadOnlyControl so that the form has the values
-      let control = column.editorConfig ? ControlFactory.create(column.editorType, column.editorConfig) : new ReadOnlyControl({ key: column.name });
+      let control = column.editorConfig
+        ? ControlFactory.create(column.editorType, column.editorConfig)
+        : new ReadOnlyControl({ key: column.name });
       control.value = null; // remove copied column value
       row.controls[column.name] = control;
       row._editing[column.name] = !column.viewOnly;

@@ -252,7 +252,7 @@ export class NovoPickerElement implements OnInit {
       this.popup.instance.term = this.term;
       this.popup.instance.selected = this.selected;
       this.popup.instance.autoSelectFirstOption = this.autoSelectFirstOption;
-      this.popup.instance.overlay = this.container._overlayRef;
+      this.popup.instance.overlay = this.container.overlayRef;
       this.ref.markForCheck();
     }
   }

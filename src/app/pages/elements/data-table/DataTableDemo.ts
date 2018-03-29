@@ -209,7 +209,6 @@ export class DataTableDemoComponent implements OnInit {
         click: this.log.bind(this),
       },
       filterable: true,
-      sortable: true,
     },
     {
       id: 'simpleEmbeddedObj',
@@ -223,7 +222,7 @@ export class DataTableDemoComponent implements OnInit {
     {
       id: 'date',
       label: 'Date',
-      enabled: false,
+      enabled: true,
       type: 'date',
       filterable: {
         type: 'date',
@@ -340,7 +339,7 @@ export class DataTableDemoComponent implements OnInit {
   private staticDataSet3: MockData[] = [];
 
   constructor(private ref: ChangeDetectorRef, private modalService: NovoModalService) {
-    for (let i = 0; i < 1000; i++) {
+    for (let i = 0; i < 50; i++) {
       let day = i < 500 ? dateFns.subDays(new Date(), i) : dateFns.addDays(new Date(), i - 500);
       this.staticDataSet1.push({
         id: i,
