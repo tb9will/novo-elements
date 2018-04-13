@@ -15,7 +15,7 @@ import {
   ChangeDetectionStrategy,
 } from '@angular/core';
 import { DOCUMENT } from '@angular/platform-browser';
-import { Overlay, OverlayRef, OverlayConfig, PositionStrategy, ScrollStrategy, OverlayPositionBuilder } from '@angular/cdk/overlay';
+import { Overlay, OverlayRef, OverlayConfig, PositionStrategy, ScrollStrategy } from '@angular/cdk/overlay';
 import { TemplatePortal } from '@angular/cdk/portal';
 import { Observable } from 'rxjs/Observable';
 import { Subscription } from 'rxjs/Subscription';
@@ -205,10 +205,6 @@ export class NovoOverlayTemplate implements OnDestroy {
           .connectedTo(this.getConnectedElement(), { originX: 'start', originY: 'center' }, { overlayX: 'start', overlayY: 'center' })
           .withFallbackPosition({ originX: 'start', originY: 'top' }, { overlayX: 'start', overlayY: 'top' })
           .withFallbackPosition({ originX: 'start', originY: 'bottom' }, { overlayX: 'start', overlayY: 'bottom' });
-      case 'right':
-        return this.overlay
-          .position()
-          .connectedTo(this.getConnectedElement(), { originX: 'end', originY: 'bottom' }, { overlayX: 'start', overlayY: 'bottom' });
       default:
         return this.overlay
           .position()

@@ -39,6 +39,7 @@ export class NovoDropdownElement implements OnInit, OnDestroy {
   @Input() side: 'right' | 'default' | 'bottom' = 'default';
   @Input() scrollStrategy: 'reposition' | 'block' | 'close' = 'reposition';
   @Input() height: number;
+  @Input() appendToBody: boolean = false; // TODO - deprecated - remove
 
   @Output() toggled: EventEmitter<boolean> = new EventEmitter<boolean>();
 

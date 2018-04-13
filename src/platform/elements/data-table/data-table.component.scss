@@ -472,7 +472,7 @@ novo-data-table-pagination {
   overflow-x: hidden;
   overflow-y: auto;
   &.right {
-    margin-left: -150px;
+    margin-left: -150px !important;
   }
   .header {
     padding: 5px 10px;
