@@ -15,7 +15,7 @@ import {
   ChangeDetectionStrategy,
 } from '@angular/core';
 import { DOCUMENT } from '@angular/platform-browser';
-import { Overlay, OverlayRef, OverlayConfig, PositionStrategy, ScrollStrategy } from '@angular/cdk/overlay';
+import { Overlay, OverlayRef, OverlayConfig, PositionStrategy, ScrollStrategy, OverlayPositionBuilder } from '@angular/cdk/overlay';
 import { TemplatePortal } from '@angular/cdk/portal';
 import { Observable } from 'rxjs/Observable';
 import { Subscription } from 'rxjs/Subscription';
@@ -177,7 +177,7 @@ export class NovoOverlayTemplate implements OnDestroy {
 
   private getOverlayConfig(): OverlayConfig {
     const overlayState: OverlayConfig = new OverlayConfig();
-    overlayState.positionStrategy = this.getOverlayPosition();
+    overlayState.positionStrategy = this.getOverlayPosition(this.position);
     if (this.size === 'inherit') {
       overlayState.width = this.getHostWidth();
     }
@@ -197,32 +197,24 @@ export class NovoOverlayTemplate implements OnDestroy {
     }
   }
 
-  private getOverlayPosition(): PositionStrategy {
-    switch (this.position) {
+  private getOverlayPosition(position: string): PositionStrategy {
+    switch (position) {
       case 'center':
-        this.positionStrategy = this.overlay
+        return this.overlay
           .position()
           .connectedTo(this.getConnectedElement(), { originX: 'start', originY: 'center' }, { overlayX: 'start', overlayY: 'center' })
           .withFallbackPosition({ originX: 'start', originY: 'top' }, { overlayX: 'start', overlayY: 'top' })
           .withFallbackPosition({ originX: 'start', originY: 'bottom' }, { overlayX: 'start', overlayY: 'bottom' });
-        break;
       case 'right':
-        this.positionStrategy = this.overlay
+        return this.overlay
           .position()
-          .connectedTo(this.getConnectedElement(), { originX: 'end', originY: 'bottom' }, { overlayX: 'end', overlayY: 'top' })
-          .withFallbackPosition({ originX: 'start', originY: 'bottom' }, { overlayX: 'start', overlayY: 'top' })
-          .withFallbackPosition({ originX: 'end', originY: 'top' }, { overlayX: 'end', overlayY: 'bottom' })
-          .withFallbackPosition({ originX: 'start', originY: 'top' }, { overlayX: 'start', overlayY: 'bottom' });
-        break;
+          .connectedTo(this.getConnectedElement(), { originX: 'end', originY: 'bottom' }, { overlayX: 'start', overlayY: 'bottom' });
       default:
-        this.positionStrategy = this.overlay
+        return this.overlay
           .position()
           .connectedTo(this.getConnectedElement(), { originX: 'start', originY: 'bottom' }, { overlayX: 'start', overlayY: 'top' })
           .withFallbackPosition({ originX: 'start', originY: 'top' }, { overlayX: 'start', overlayY: 'bottom' });
-        break;
     }
-
-    return this.positionStrategy;
   }
 
   private checkSizes(): void {
