@@ -21,11 +21,8 @@ novo-dropdown {
   padding: 0;
   min-width: 180px;
   z-index: 1000;
-  margin-top: 0.8em;
+  margin-top: 5px;
   box-shadow: $whiteframe-shadow-z3;
-  &.right {
-    margin-left: -140px;
-  }
   &.has-height {
     overflow: auto;
   }

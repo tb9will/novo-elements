@@ -15,7 +15,16 @@ import {
   ChangeDetectionStrategy,
 } from '@angular/core';
 import { DOCUMENT } from '@angular/platform-browser';
-import { Overlay, OverlayRef, OverlayConfig, PositionStrategy, ScrollStrategy } from '@angular/cdk/overlay';
+import {
+  Overlay,
+  OverlayRef,
+  OverlayConfig,
+  PositionStrategy,
+  ScrollStrategy,
+  ConnectedPositionStrategy,
+  HorizontalConnectionPos,
+  VerticalConnectionPos,
+} from '@angular/cdk/overlay';
 import { TemplatePortal } from '@angular/cdk/portal';
 import { Observable } from 'rxjs/Observable';
 import { Subscription } from 'rxjs/Subscription';
@@ -25,6 +34,8 @@ import { of as observableOf } from 'rxjs/observable/of';
 import { filter } from 'rxjs/operators/filter';
 import { first } from 'rxjs/operators/first';
 import { switchMap } from 'rxjs/operators/switchMap';
+
+import { Helpers } from '../../utils/Helpers';
 
 @Component({
   selector: 'novo-overlay-template',
@@ -45,7 +56,8 @@ export class NovoOverlayTemplate implements OnDestroy {
 
   @Input() public position: string = 'default';
   @Input() public scrollStrategy: 'reposition' | 'block' | 'close' = 'reposition';
-  @Input() public size: string = 'inherit';
+  @Input() public width: number;
+  @Input() public height: number;
   @Input() public closeOnSelect: boolean = true;
   @Input()
   public set parent(value: ElementRef) {
@@ -175,17 +187,6 @@ export class NovoOverlayTemplate implements OnDestroy {
     this.overlayRef = this.overlay.create(this.getOverlayConfig());
   }
 
-  private getOverlayConfig(): OverlayConfig {
-    const overlayState: OverlayConfig = new OverlayConfig();
-    overlayState.positionStrategy = this.getOverlayPosition(this.position);
-    if (this.size === 'inherit') {
-      overlayState.width = this.getHostWidth();
-    }
-    overlayState.direction = 'ltr';
-    overlayState.scrollStrategy = this.getScrollStrategy();
-    return overlayState;
-  }
-
   private getScrollStrategy(): ScrollStrategy {
     switch (this.scrollStrategy) {
       case 'block':
@@ -197,26 +198,62 @@ export class NovoOverlayTemplate implements OnDestroy {
     }
   }
 
-  private getOverlayPosition(position: string): PositionStrategy {
-    switch (position) {
-      case 'center':
-        return this.overlay
-          .position()
-          .connectedTo(this.getConnectedElement(), { originX: 'start', originY: 'center' }, { overlayX: 'start', overlayY: 'center' })
-          .withFallbackPosition({ originX: 'start', originY: 'top' }, { overlayX: 'start', overlayY: 'top' })
-          .withFallbackPosition({ originX: 'start', originY: 'bottom' }, { overlayX: 'start', overlayY: 'bottom' });
-      default:
-        return this.overlay
-          .position()
-          .connectedTo(this.getConnectedElement(), { originX: 'start', originY: 'bottom' }, { overlayX: 'start', overlayY: 'top' })
-          .withFallbackPosition({ originX: 'start', originY: 'top' }, { overlayX: 'start', overlayY: 'bottom' });
+  private getOverlayConfig(): OverlayConfig {
+    const config: OverlayConfig = new OverlayConfig();
+
+    if (!this.width) {
+      config.width = this.getHostWidth();
+    } else {
+      config.width = this.width;
     }
+
+    if (this.height) {
+      config.height = this.height;
+    }
+
+    config.positionStrategy = this.getPosition();
+    config.hasBackdrop = true;
+    config.backdropClass = 'novo-overlay-transparent-backdrop';
+    config.direction = 'ltr';
+    config.scrollStrategy = this.getScrollStrategy();
+
+    return config;
+  }
+
+  private getPosition(): ConnectedPositionStrategy {
+    if (this.position === 'right') {
+      let [originX, originFallbackX]: HorizontalConnectionPos[] = ['end', 'start'];
+
+      let [overlayY, overlayFallbackY]: VerticalConnectionPos[] = ['bottom', 'bottom'];
+
+      let [originY, originFallbackY] = [overlayY, overlayFallbackY];
+      let [overlayX, overlayFallbackX] = [originX, originFallbackX];
+
+      return this.overlay
+        .position()
+        .connectedTo(this.getConnectedElement(), { originX, originY }, { overlayX, overlayY })
+        .withDirection('ltr')
+        .withFallbackPosition({ originX: originFallbackX, originY }, { overlayX: overlayFallbackX, overlayY })
+        .withFallbackPosition({ originX, originY: originFallbackY }, { overlayX, overlayY: overlayFallbackY })
+        .withFallbackPosition(
+          { originX: originFallbackX, originY: originFallbackY },
+          { overlayX: overlayFallbackX, overlayY: overlayFallbackY },
+        );
+    }
+    return this.overlay
+      .position()
+      .connectedTo(this.getConnectedElement(), { originX: 'start', originY: 'bottom' }, { overlayX: 'start', overlayY: 'top' })
+      .withDirection('ltr')
+      .withFallbackPosition({ originX: 'start', originY: 'top' }, { overlayX: 'start', overlayY: 'bottom' });
   }
 
   private checkSizes(): void {
     if (this.overlayRef) {
-      if (this.size === 'inherit') {
+      if (!this.width) {
         this.overlayRef.getConfig().width = this.getHostWidth();
+      }
+      if (this.height) {
+        this.overlayRef.getConfig().height = this.height;
       }
       this.overlayRef.updateSize(this.overlayRef.getConfig());
       this.overlayRef.updatePosition();

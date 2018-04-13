@@ -25,8 +25,8 @@ import { Helpers } from '../../utils/Helpers';
   selector: 'novo-dropdown',
   template: `
       <ng-content select="button" #trigger></ng-content>
-      <novo-overlay-template [parent]="element" [position]="side" [scrollStrategy]="scrollStrategy">
-        <div class="dropdown-container {{ containerClass }}" [style.height.px]="height" [class.right]="side === 'right'" [class.has-height]="!!height">
+      <novo-overlay-template [parent]="element" [width]="width" [position]="side" [scrollStrategy]="scrollStrategy">
+        <div class="dropdown-container {{ containerClass }}" [style.height.px]="height" [class.has-height]="!!height">
           <ng-content></ng-content>
         </div>
       </novo-overlay-template>
@@ -39,6 +39,7 @@ export class NovoDropdownElement implements OnInit, OnDestroy {
   @Input() side: 'right' | 'default' | 'bottom' = 'default';
   @Input() scrollStrategy: 'reposition' | 'block' | 'close' = 'reposition';
   @Input() height: number;
+  @Input() width: number = 180;
   @Input() appendToBody: boolean = false; // TODO - deprecated - remove
 
   @Output() toggled: EventEmitter<boolean> = new EventEmitter<boolean>();
