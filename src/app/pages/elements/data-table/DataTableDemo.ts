@@ -339,7 +339,7 @@ export class DataTableDemoComponent implements OnInit {
   private staticDataSet3: MockData[] = [];
 
   constructor(private ref: ChangeDetectorRef, private modalService: NovoModalService) {
-    for (let i = 0; i < 50; i++) {
+    for (let i = 0; i < 1000; i++) {
       let day = i < 500 ? dateFns.subDays(new Date(), i) : dateFns.addDays(new Date(), i - 500);
       this.staticDataSet1.push({
         id: i,
