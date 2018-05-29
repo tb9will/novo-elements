@@ -15,6 +15,7 @@ import {
   NovoModalService,
   AppBridgeService,
   DevAppBridgeService,
+  NovoTemplateService,
 } from './../platform/index';
 // APP
 import { CodeSnippet } from './elements/codesnippet/CodeSnippet';
@@ -173,6 +174,7 @@ export function provideAppBridgeService(http) {
     AppRoutingModule,
   ],
   providers: [
+    NovoTemplateService,
     FormUtils,
     NovoLabelService,
     {
@@ -205,4 +207,4 @@ export function provideAppBridgeService(http) {
   ],
   bootstrap: [AppComponent],
 })
-export class AppModule {}
+export class AppModule { }
