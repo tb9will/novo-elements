@@ -20,6 +20,7 @@ import {
   TextBoxControl,
   TilesControl,
   TimeControl,
+  CustomControl,
   NovoControlConfig
 } from '../../elements/form/FormControls';
 import { EntityPickerResult, EntityPickerResults } from '../../elements/picker/extras/entity-picker-results/EntityPickerResults';
@@ -248,7 +249,7 @@ export class FormUtils {
         controlConfig.dateFormat = field.dateFormat;
         controlConfig.textMaskEnabled = field.textMaskEnabled;
         controlConfig.allowInvalidDate = field.allowInvalidDate;
-        controlConfig.military = config ? !!config.military : false;        
+        controlConfig.military = config ? !!config.military : false;
         control = new DateControl(controlConfig);
         break;
       case 'time':
@@ -334,6 +335,9 @@ export class FormUtils {
         break;
       case 'file':
         control = new FileControl(controlConfig);
+        break;
+      case 'custom':
+        control = new CustomControl(controlConfig);
         break;
       default:
         control = new TextBoxControl(controlConfig);
